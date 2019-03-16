@@ -38,6 +38,12 @@ from matplotlib import pyplot as plt
 
 net = model_zoo.get_model('yolo3_darknet53_voc', pretrained=True)
 
+
+# initialize the camera and grab a reference to the raw camera capture
+camera = PiCamera()
+camera.resolution = (224, 224)
+camera.framerate = 32
+rawCapture = PiRGBArray(camera, size=(224, 224))
 #model = ResNet50(weights='input/best.hdf5', include_top=False)
 #json_file = open('input/model.json', 'r')
 #loaded_model_json = json_file.read()
@@ -57,29 +63,27 @@ def main():
   #  nfeatures=5000, edgeThreshold=20, patchSize=20, scaleFactor=1.3, nlevels=20)
   #kp1, des1 = orb.detectAndCompute(img1, None)
 
-  frame_count = 0
-  
-  cap = cv.VideoCapture(0)
-  while(True):
-      # Capture frame-by-frame
-      ret, frame = cap.read()
-      frame_count += 1
-      try:
-        if frame_count % 30 == 0:
-            print(ret)
-            #frame = cv.resize(frame, (224,224))
-            get_match_image(frame)
-        # Display the resulting frame
-        #cv.imshow('frame', img3)
-      except:
-        traceback.print_exc()
-        time.sleep(0.5)
-      if cv.waitKey(1) & 0xFF == ord('q'):
-          break
+    frame_count = 0
+    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+        try:
+            # grab the raw NumPy array representing the image, then initialize the timestamp
+            # and occupied/unoccupied text
+            image = frame.array
+            #cv.imshow("Frame", image)
+            key = cv.waitKey(1) & 0xFF
 
-  # When everything done, release the capture
-  cap.release()
-  cv.destroyAllWindows()
+            # clear the stream in preparation for the next frame
+            rawCapture.truncate(0)
+
+            # if the `q` key was pressed, break from the loop
+            if key == ord("q"):
+                break
+
+            get_match_image(image)
+        except:
+            print("ex")
+
+  #cv.destroyAllWindows()
 
 def get_match_image(img):
     #img_path = 'banana.jpg'
@@ -123,10 +127,9 @@ def get_match_image(img):
 
     class_IDs, scores, bounding_boxs = net(x)
 
-    lables, scores = plot_bbox1(img, bounding_boxs[0], scores[0],
+    result = plot_bbox1(img, bounding_boxs[0], scores[0],
                            class_IDs[0], class_names=net.classes)
-    print(lables)
-    print(scores)
+    print(result)
     #plt.show()
     #print(net.classes)
     #print(scores[0])
@@ -142,7 +145,6 @@ def plot_bbox1(img, bboxes, scores=None, labels=None, thresh=0.5,
               class_names=None, colors=None, ax=None,
               reverse_rgb=False, absolute_coordinates=True):
     all_names = []
-    probs = []
     from matplotlib import pyplot as plt
 
     if labels is not None and not len(bboxes) == len(labels):
@@ -202,8 +204,7 @@ def plot_bbox1(img, bboxes, scores=None, labels=None, thresh=0.5,
         #             bbox=dict(facecolor=colors[cls_id], alpha=0.5),
         #             fontsize=12, color='white')
         all_names.append(class_name)
-        probs.append(score)
-    return all_names, probs
+    return all_names
 
 if __name__ == "__main__":
   main()
