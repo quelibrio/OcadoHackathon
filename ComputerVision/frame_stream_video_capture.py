@@ -24,6 +24,10 @@ import tensorflow as tf
 from gluoncv import model_zoo, data, utils
 from matplotlib import pyplot as plt
 
+import pyttsx3
+engine = pyttsx3.init()
+
+
 ######################################################################
 # Load a pretrained model
 # -------------------------
@@ -125,6 +129,11 @@ def get_match_image(img):
                            class_IDs[0], class_names=net.classes)
     print(lables)
     print(scores)
+    for label in lables:
+        engine.say(label)
+        engine.runAndWait()
+        #engine.say(scores[0])
+        #engine.runAndWait()
     #plt.show()
     #print(net.classes)
     #print(scores[0])

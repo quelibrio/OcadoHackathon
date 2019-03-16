@@ -41,9 +41,9 @@ net = model_zoo.get_model('yolo3_darknet53_voc', pretrained=True)
 
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
-camera.resolution = (224, 224)
+camera.resolution = (640, 480)
 camera.framerate = 32
-rawCapture = PiRGBArray(camera, size=(224, 224))
+rawCapture = PiRGBArray(camera, size=(640, 480))
 #model = ResNet50(weights='input/best.hdf5', include_top=False)
 #json_file = open('input/model.json', 'r')
 #loaded_model_json = json_file.read()
