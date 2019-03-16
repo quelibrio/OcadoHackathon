@@ -19,8 +19,6 @@ import numpy as np
 from keras.models import load_model
 from keras.models import model_from_json
 import tensorflow as tf
-from picamera.array import PiRGBArray
-from picamera import PiCamera
 
 
 from gluoncv import model_zoo, data, utils

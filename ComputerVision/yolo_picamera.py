@@ -127,9 +127,10 @@ def get_match_image(img):
 
     class_IDs, scores, bounding_boxs = net(x)
 
-    result = plot_bbox1(img, bounding_boxs[0], scores[0],
+    labels, scores = plot_bbox1(img, bounding_boxs[0], scores[0],
                            class_IDs[0], class_names=net.classes)
-    print(result)
+    print(labels)
+    print(scores)
     #plt.show()
     #print(net.classes)
     #print(scores[0])
@@ -145,6 +146,7 @@ def plot_bbox1(img, bboxes, scores=None, labels=None, thresh=0.5,
               class_names=None, colors=None, ax=None,
               reverse_rgb=False, absolute_coordinates=True):
     all_names = []
+    probs = []
     from matplotlib import pyplot as plt
 
     if labels is not None and not len(bboxes) == len(labels):
@@ -204,7 +206,8 @@ def plot_bbox1(img, bboxes, scores=None, labels=None, thresh=0.5,
         #             bbox=dict(facecolor=colors[cls_id], alpha=0.5),
         #             fontsize=12, color='white')
         all_names.append(class_name)
-    return all_names
+        probs.append(score)
+    return all_names, scores
 
 if __name__ == "__main__":
   main()
