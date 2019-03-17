@@ -77,16 +77,19 @@ def main():
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
             break
-        
-        im_fname = utils.download('http://xnftpi.local/html/cam_pic.php?time=1552819370977&pDelay=40000&fbclid=IwAR22U0q3yLxCGCIkQgGC_T1pmjQAJV0cWwo4nAALSwqAhEzK9Bef_TckVbw',
-                    path='frame.jpeg')
+        # im_fname = utils.download('http://xnftpi.local/html/cam_pic.php?time=' + str(time.time()) + '&pDelay=40000',
+        im_fname = utils.download('http://xnftpi.local/html/cam_pic.php?time=1552819370977&pDelay=40000',
+                    path='frame1.jpeg')
         get_match_image(image)
+        import os
+        os.remove("/home/quelibrio/Deep Learning/SemanticSegmentation/OcadoHackaton/ComputerVision/frame1.jpeg")
        # except Exception as inst:
         #    print(inst)
 
   #cv.destroyAllWindows()
 
 def get_match_image(img):
+    plt.close('all')
     #img_path = 'banana.jpg'
     #img = image.load_img(img_path, target_size=(224, 224))
     #x = image.img_to_array(img)
@@ -122,16 +125,31 @@ def get_match_image(img):
     #from PIL import Image
     #im = Image.fromarray(img)
     #im.save("frame.jpeg")
-    x, img1 = data.transforms.presets.yolo.load_test("frame.jpeg", short=512)
+    x, img1 = data.transforms.presets.yolo.load_test("frame1.jpeg", short=512)
 
     class_IDs, scores, bounding_boxs = net(x)
-
-    axes = utils.viz.plot_bbox(img, bounding_boxs[0], scores[0], class_IDs[0], class_names=net.classes)
+    
+    
+    axes = utils.viz.plot_bbox(img1, bounding_boxs[0], scores[0], class_IDs[0], class_names=net.classes)
+    from matplotlib.pyplot import figure
+    #figure(num=None, figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
+    #fig = plt.figure()
+    #plt.figure(figsize=(16,16))
+    plt.rcParams["figure.figsize"] = [17,17]
     plt.draw()
-    plt.pause(0.0001)
 
+    plt.savefig( 'frames/' + str(time.time()) + '_screen.png')
+    plt.pause(2)
+    
+
+    #plt.draw()
+    #plt.pause(2000)
+    #time.sleep(1000)
+    
     labels1, scores1 = plot_bbox1(img, bounding_boxs[0], scores[0],
                            class_IDs[0], class_names=net.classes)
+
+            
     print(labels1)
     #print(scores)
     #plt.show()
