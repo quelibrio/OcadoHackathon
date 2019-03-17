@@ -24,6 +24,7 @@ import tensorflow as tf
 
 from gluoncv import model_zoo, data, utils
 from matplotlib import pyplot as plt
+import cv2 as cv
 
 ######################################################################
 # Load a pretrained model
@@ -127,6 +128,8 @@ def get_match_image(img):
     #im.save("frame.jpeg")
     x, img1 = data.transforms.presets.yolo.load_test("frame1.jpeg", short=512)
 
+
+
     class_IDs, scores, bounding_boxs = net(x)
     
     
@@ -141,7 +144,16 @@ def get_match_image(img):
     plt.savefig( 'frames/' + str(time.time()) + '_screen.png')
     plt.pause(2)
     
+    hsv = cv.cvtColor(img1, cv.COLOR_BGR2HSV)
 
+    lower_red = np.array([0, 0, 255])
+    upper_red = np.array([255, 255, 255])
+    mask = cv.inRange(hsv, lower_red, upper_red)
+    (minVal, maxVal, minLoc, maxLoc) = cv.minMaxLoc(mask)
+
+    cv.circle(img1, maxLoc, 20, (0, 0, 255), 2, cv.LINE_AA)
+    #cv.imshow('Track Laser', img1)
+    cv.imwrite( 'laser/' + str(time.time()) + '_screen.png', img1 )
     #plt.draw()
     #plt.pause(2000)
     #time.sleep(1000)
