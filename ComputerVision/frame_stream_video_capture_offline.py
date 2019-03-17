@@ -134,8 +134,9 @@ def get_match_image(img):
         engine.runAndWait()
         #engine.say(scores[0])
         #engine.runAndWait()
-    #plt.show()
-    #print(net.classes)
+    
+    plt.show()
+    print(net.classes)
     #print(scores[0])
     #print(class_IDs[0])
     #time.sleep(100)

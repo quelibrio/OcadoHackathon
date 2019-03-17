@@ -19,14 +19,11 @@ import numpy as np
 from keras.models import load_model
 from keras.models import model_from_json
 import tensorflow as tf
-
+#from picamera.array import PiRGBArray
+#from picamera import PiCamera
 
 from gluoncv import model_zoo, data, utils
 from matplotlib import pyplot as plt
-
-import pyttsx3
-engine = pyttsx3.init()
-
 
 ######################################################################
 # Load a pretrained model
@@ -38,8 +35,14 @@ engine = pyttsx3.init()
 # zoo if necessary. For more pretrained models, please refer to
 # :doc:`../../model_zoo/index`.
 
-net = model_zoo.get_model('yolo3_darknet53_coco', pretrained=True)
+net = model_zoo.get_model('yolo3_darknet53_voc', pretrained=True)
 
+
+# initialize the camera and grab a reference to the raw camera capture
+#camera = PiCamera()
+#camera.resolution = (640, 480)
+#camera.framerate = 32
+#rawCapture = PiRGBArray(camera, size=(640, 480))
 #model = ResNet50(weights='input/best.hdf5', include_top=False)
 #json_file = open('input/model.json', 'r')
 #loaded_model_json = json_file.read()
@@ -59,29 +62,29 @@ def main():
   #  nfeatures=5000, edgeThreshold=20, patchSize=20, scaleFactor=1.3, nlevels=20)
   #kp1, des1 = orb.detectAndCompute(img1, None)
 
-  frame_count = 0
-  
-  cap = cv.VideoCapture(0)
-  while(True):
-      # Capture frame-by-frame
-      ret, frame = cap.read()
-      frame_count += 1
-      try:
-        if frame_count % 30 == 0:
-            print(ret)
-            #frame = cv.resize(frame, (224,224))
-            get_match_image(frame)
-        # Display the resulting frame
-        #cv.imshow('frame', img3)
-      except:
-        traceback.print_exc()
-        time.sleep(0.5)
-      if cv.waitKey(1) & 0xFF == ord('q'):
-          break
+    frame_count = 0
+    while True:
+    #try:
+        # grab the raw NumPy array representing the image, then initialize the timestamp
+        # and occupied/unoccupied text
+        #image = frame.array
+        #cv.imshow("Frame", image)
+        key = cv.waitKey(1) & 0xFF
 
-  # When everything done, release the capture
-  cap.release()
-  cv.destroyAllWindows()
+        # clear the stream in preparation for the next frame
+        #rawCapture.truncate(0)
+
+        # if the `q` key was pressed, break from the loop
+        if key == ord("q"):
+            break
+        
+        im_fname = utils.download('http://xnftpi.local/html/cam_pic.php?time=1552819370977&pDelay=40000&fbclid=IwAR22U0q3yLxCGCIkQgGC_T1pmjQAJV0cWwo4nAALSwqAhEzK9Bef_TckVbw',
+                    path='frame.jpeg')
+        get_match_image(image)
+       # except Exception as inst:
+        #    print(inst)
+
+  #cv.destroyAllWindows()
 
 def get_match_image(img):
     #img_path = 'banana.jpg'
@@ -95,9 +98,7 @@ def get_match_image(img):
     # (one such list for each sample in the batch)
     #print(preds)
     #print('Predicted:', decode_predictions(preds, top=3)[0])
-    #im_fname = utils.download('https://raw.githubusercontent.com/zhreshold/' +
-    #                      'mxnet-ssd/master/data/demo/dog.jpg',
-    #                     path='dog.jpg')
+    #
     #x, img = data.transforms.presets.yolo.load_test(img, short=512)
     #print('Shape of pre-processed image:', x.shape)
 
@@ -118,22 +119,21 @@ def get_match_image(img):
     #img_array = np.asarray(img)
     # set input blob for the network
     #net.setInput(blob)
-    from PIL import Image
-    im = Image.fromarray(img)
-    im.save("frame.jpeg")
+    #from PIL import Image
+    #im = Image.fromarray(img)
+    #im.save("frame.jpeg")
     x, img1 = data.transforms.presets.yolo.load_test("frame.jpeg", short=512)
 
     class_IDs, scores, bounding_boxs = net(x)
 
-    lables, scores = plot_bbox1(img, bounding_boxs[0], scores[0],
+    axes = utils.viz.plot_bbox(img, bounding_boxs[0], scores[0], class_IDs[0], class_names=net.classes)
+    plt.draw()
+    plt.pause(0.0001)
+
+    labels1, scores1 = plot_bbox1(img, bounding_boxs[0], scores[0],
                            class_IDs[0], class_names=net.classes)
-    print(lables)
-    print(scores)
-    for label in lables:
-        engine.say(label)
-        engine.runAndWait()
-        #engine.say(scores[0])
-        #engine.runAndWait()
+    print(labels1)
+    #print(scores)
     #plt.show()
     #print(net.classes)
     #print(scores[0])
@@ -210,7 +210,7 @@ def plot_bbox1(img, bboxes, scores=None, labels=None, thresh=0.5,
         #             fontsize=12, color='white')
         all_names.append(class_name)
         probs.append(score)
-    return all_names, probs
+    return all_names, scores
 
 if __name__ == "__main__":
   main()
