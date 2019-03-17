@@ -1,0 +1,88 @@
+#include <Servo.h> 
+ 
+Servo myservo;
+Servo myservo1;// create servo object to control a servo 
+const int R_pin = 2;
+const int G_pin = 4;
+const int B_pin = 6;
+
+int servo_halt = 92.5;
+int first = 1;
+int pos = 0;    // variable to store the servo position 
+ 
+void setup() 
+{  
+  pinMode(R_pin, OUTPUT);
+  pinMode(G_pin, OUTPUT);
+  pinMode(B_pin, OUTPUT);
+      delay(100);
+      Serial.begin(9600);
+      myservo.attach(9);
+      myservo1.attach(10);  // attaches the servo on pin 9 to the servo object  
+} 
+ 
+void loop() 
+{
+  if(first > 0) {
+    myservo.write(servo_halt);        
+    myservo1.write(94);
+    first = 0;
+  }
+  
+  delay(10);
+  if (Serial.available() > 0)
+  {
+    pos = Serial.read();
+    while(Serial.available())
+    Serial.read();
+    
+    switch(int(pos)-48) {
+            case 1:
+                digitalWrite(R_pin, HIGH);
+                digitalWrite(G_pin, LOW);
+                digitalWrite(B_pin, LOW);
+              break;
+            case 2:
+                digitalWrite(R_pin, HIGH);
+                digitalWrite(G_pin, HIGH);
+                digitalWrite(B_pin, LOW);
+              break;
+            case 3:
+                digitalWrite(R_pin, HIGH);
+                digitalWrite(G_pin, LOW);
+                digitalWrite(B_pin, HIGH);
+              break;
+           default:
+                digitalWrite(R_pin, LOW);
+                digitalWrite(G_pin, LOW);
+                digitalWrite(B_pin, LOW);
+              break;
+          }
+          
+    if (pos == 'a')
+    {
+     myservo.write(servo_halt);        
+     myservo1.write(94);        
+    } 
+    if (pos == 'b')
+    {
+     myservo.write(170);        
+     myservo1.write(10);        
+    } 
+    if (pos == 'c')
+     {
+     myservo.write(10);        
+     myservo1.write(170);        
+    }         
+   if (pos == 'e')
+     {
+     myservo.write(170);        
+     myservo1.write(170);        
+    }
+  if (pos == 'd')
+    {
+     myservo.write(10);        
+     myservo1.write(10);        
+    }          
+ }
+}
